@@ -1,0 +1,733 @@
+// The protocol, whole: one template for every message the device and the host
+// exchange. It is the schema the codecs, the bindings and the field names all
+
+syntax = "proto3";
+
+package ThetaGP;
+
+// ── common ──
+
+// The declarations every domain of the ThetaGP CDC protocol is written from:
+// the code and the reason a reply that failed carries, the record types a
+
+// Numeric codes. The values are the firmware's own table, gaps and all.
+//
+enum ErrorCode {
+  ERR_NONE            = 0; // Success (internal only)
+  ERR_UNKNOWN_CMD     = 1; // Unknown command name
+  ERR_INVALID_PARAM   = 2; // Invalid parameter value
+  ERR_INTERNAL        = 3; // Device internal error
+  ERR_BUSY            = 4; // Device busy, retry later
+  // 5 is not in that table, so the slot stays empty here as it is there.
+  ERR_NOT_SUPPORTED   = 6; // Command not supported in current state
+  ERR_BUFFER_OVERFLOW = 7; // Response too long to send
+  ERR_INVALID_STATE   = 8; // Command refused by the state the device is in
+}
+
+// What was wrong with the request, as a value a host switches on. The sentence
+// the numbers beside it (param1/param2), so the device sends a value and never
+enum Reason {
+  REASON_NONE                      = 0;
+  REASON_UNKNOWN_COMMAND           = 1;
+  REASON_UNKNOWN_KEY               = 2;
+  REASON_VALUE_OUT_OF_RANGE        = 3;  // param1 = min, param2 = max
+  REASON_VALUE_NOT_INTEGER         = 4;
+  REASON_VALUE_MISSING             = 5;
+  REASON_VALUE_ELEMENT_COUNT       = 6;  // param1 = the number of elements the key holds
+  REASON_VALUE_ELEMENT_REJECTED    = 7;  // param1 = the index of the element
+  REASON_VALUE_TOO_LONG            = 8;
+  REASON_REPLY_TOO_LONG            = 9;
+  REASON_NO_PERSISTENT_STORAGE     = 10;
+  REASON_ACTIVE_PROFILE_IS_FACTORY = 11;
+  REASON_PROFILE_READ_FAILED       = 12;
+  REASON_PROFILE_WRITE_FAILED      = 13;
+  REASON_PROFILE_CREATE_FAILED     = 14;
+  REASON_PROFILE_DELETE_FAILED     = 15;
+  REASON_PROFILE_SELECT_FAILED     = 16;
+  REASON_PROFILE_SAVE_FAILED       = 17;
+  REASON_PROFILE_LOAD_FAILED       = 18;
+  REASON_PROFILE_NOT_FOUND         = 19;
+  REASON_CANNOT_DELETE_FACTORY     = 20; // param1 = 1, param2 = 15
+  REASON_INVALID_LENGTH            = 21; // param1 = min, param2 = max
+  REASON_ID_OUT_OF_RANGE           = 22; // param1 = min, param2 = max
+  REASON_INVALID_TASK_ID           = 23;
+  REASON_NOT_IMPLEMENTED           = 24;
+  REASON_FLASH_ERASE_FAILED        = 25;
+  REASON_FLASH_READ_FAILED         = 26;
+  REASON_INVALID_ADDRESS_RANGE     = 27;
+  // The reasons a TransportError carries: the frame layer refused the frame, so
+  // no command can be named. No Error carries them.
+  REASON_FRAME_CHECKSUM            = 28; // The payload's sum did not hold
+  REASON_FRAME_PREFIX              = 29; // The length prefix, or the length it declared, is not legal
+  REASON_FRAME_INCOMPLETE          = 30; // A declared length whose bytes stopped arriving
+  REASON_PAYLOAD_UNREADABLE        = 31; // The sum held, and the payload is not a message
+  REASON_FRAME_NO_ROOM             = 32; // The receive side had no slot left for it
+}
+
+// A command failure: the request was read, and what it asked for was refused
+// or could not be done.
+message Error {
+  optional ErrorCode code = 1;
+  Reason   reason = 2;
+  uint32   param1 = 3;
+  uint32   param2 = 4;
+}
+
+// The request could not be read at all: there is no command to name, so there
+// is no code, and the reply's queued count does not apply.
+message TransportError {
+  Reason reason = 1;
+  uint32 param1 = 2;
+}
+
+// One memory region the firmware reports in sys.get_usage.
+message MemoryRegion {
+  string name     = 1;  // The region's name, as the firmware's region list spells it
+  uint32 size     = 2;  // The region's capacity in bytes
+  uint32 used     = 3;  // The bytes of the region in use
+  uint32 reserved = 4;  // The part of `used` a fixed reserve already holds
+}
+
+// One configuration key the firmware supports, as config.list_keys reports it.
+message ConfigKeyEntry {
+  string key    = 1;  // The key's name, as a request names it
+  int32  min    = 2;  // Lowest value the key accepts
+  int32  max    = 3;  // Highest value the key accepts
+  bool   reboot = 4;
+}
+
+// A profile body as the configuration store keeps it on its flash chip: the
+// version of the format the body was written in, and the body itself.
+message ProfileStore {
+  uint32 version = 1;  // The body's own version
+  bytes  body    = 2;  // The body of that version
+}
+
+// ── sys ──
+
+// The system domain: the six commands the firmware serves under `sys.`, as the
+// request each one accepts and the payload it answers a request that succeeded
+
+// Connectivity health check.
+message SysPing {}
+
+// sys.ping takes no argument and answers with the envelope alone, so it has no
+// success payload.
+message SysPingOk {}
+
+// Read firmware version and build info.
+message SysGetFwVersion {}
+
+message SysGetFwVersionOk {
+  string board      = 1;  // Name of the board the firmware was built for, as that build declares it
+  string version    = 2;  // Semantic version string
+  string build_date = 3;  // Build date
+  string build_time = 4;  // Build time
+}
+
+// Trigger NVIC system reset.
+message SysReset {}
+
+// sys.reset's answer is the envelope alone.
+//
+message SysResetOk {}
+
+// Enter DFU bootloader mode.
+message SysEnterDfu {}
+
+// sys.enter_dfu has no successful answer today: every request is refused with
+// ERR_NOT_SUPPORTED (6) and the reason REASON_NOT_IMPLEMENTED.
+message SysEnterDfuOk {}
+
+// Get task scheduler statistics by TID.
+message SysGetTaskInfo {
+  int32 tid = 1;  // The task to report, by its index in the scheduler's task list
+}
+
+message SysGetTaskInfoOk {
+  int32  tid          = 1;
+  string name         = 2;
+  string sub          = 3;
+  uint32 desired_us   = 4;  // The period the task asks for
+  uint32 avg_cycle_us = 5;  // Moving-average cycle time, microseconds
+  uint32 actual_hz    = 6;  // Rate the moving-average cycle time works out to
+  uint32 max_exec_us  = 7;  // Longest execution time seen, microseconds
+  uint32 avg_exec_us  = 8;  // Moving-average execution time, microseconds
+  uint32 total_exec_us = 9;  // Accumulated execution time since boot, microseconds
+  uint32 avg_delta_us = 10;  // Moving-average interval between executions, microseconds
+  // The two counters are written only by a build that compiles them in, so a
+  // reply of a build that does not leaves them out. `optional` is what makes
+  optional uint32 run_count  = 11;  // Times the task function has run, reported only in a build with the test API
+  optional uint32 late_count = 12;  // Times the task missed its deadline, reported only in a build with the test API
+}
+
+// Aggregate resource usage: CPU load, MCU flash, MCU RAM, external SPI flash.
+message SysGetUsage {}
+
+message SysGetUsageOk {
+  uint32 cpu_load_percent           = 1;
+  uint32 task_count                 = 2;
+  uint32 mcu_flash_used_bytes       = 3;
+  uint32 mcu_flash_total_bytes      = 4;
+  uint32 ram_used_bytes             = 5;
+  uint32 ram_total_bytes            = 6;
+  uint32 ram_reserved_bytes         = 7;
+  uint32 ext_flash_total_sectors    = 8;
+  uint32 ext_flash_used_sectors     = 9;
+  uint32 ext_flash_free_sectors     = 10;
+  uint32 ext_flash_reserved_sectors = 11;
+  uint32 profile_count              = 12;
+  uint32 region_count               = 13;  // Number of entries in the regions array
+  // Array of one object per memory region the firmware reports, each object
+  // carrying the fields the record type MemoryRegion declares: its name, its
+  repeated MemoryRegion regions = 14;
+}
+
+// ── config ──
+
+// The configuration domain: the six commands the firmware serves under
+// `config.`, as the request each one accepts and the payload it answers a
+
+// A run of 32-bit elements. It exists because protobuf has no repeated field
+// inside a oneof -- protoc refuses one with "Fields in oneofs must not have
+message Int32Array {
+  repeated int32 elements = 1;  // The elements of the run, in element order
+}
+
+// Write one key of the configuration the device is running: a scalar key takes
+// a number and an array key exactly as many elements as the key holds, and the
+message ConfigSetKey {
+  // Whether a key holds one number or a run of them is a property of the key
+  // and not of this message, so the request carries both shapes and says which
+  oneof value {
+    int64      scalar = 1;  // A scalar key's value, one number
+    Int32Array array  = 2;  // An array key's elements, in element order
+  }
+  string key = 3;  // The key's name, as the key table spells it
+}
+
+// The answer to a write that was accepted: the key it reached, so a host
+// pairing replies with requests sees which field moved. Nothing of the value
+message ConfigSetKeyOk {
+  string key = 1;  // The key the write reached
+}
+
+// Read one key of the configuration the device is running back: a scalar key
+// reads back as a number and an array key as a JSON array of numbers in
+message ConfigGetKey {
+  string key = 1;  // The key's name, as the key table spells it
+}
+
+message ConfigGetKeyOk {
+  // The value the key holds: one number for a scalar key and a run of numbers
+  // for an array key, in element order. Which of the two it is is the key's
+  oneof value {
+    int64      scalar = 1;  // The value of a scalar key, one number
+    Int32Array array  = 2;  // The elements of an array key, in element order
+  }
+  // The key the value was read from, so a host pairing replies with requests
+  // sees which field answered. It carries the number after the oneof's two.
+  string key = 3;
+}
+
+// List the configuration keys this firmware supports, with each key's range
+// and whether it needs a reboot.
+message ConfigListKeys {}
+
+message ConfigListKeysOk {
+  uint32 count = 1;  // Number of entries in the keys array
+  // Array of one object per supported key, each object carrying the fields the
+  // record type ConfigKeyEntry declares: the key's name, the lowest and
+  repeated ConfigKeyEntry keys = 2;
+}
+
+// Write the configuration in effect to the profile it belongs to (the active
+// one): a board with a storage chip answers `persisted` true for a write that
+message ConfigSave {}
+
+message ConfigSaveOk {
+  // Whether the configuration was written to the device's persistent storage;
+  // false on a board that has none, where the values are in effect but will
+  bool persisted = 1;
+  // How many object keys of the body this save replaced the body it wrote does
+  // not carry. It is `optional` because a save that carried every key over
+  optional uint32 dropped_keys = 2;
+}
+
+// Read the profile the configuration in effect belongs to (the active one)
+// back over it, starting from the compiled-in defaults; the active profile id
+message ConfigLoad {}
+
+// config.load's answer is the envelope alone: what it changes is the
+// configuration in effect, and every field of that configuration is read back
+message ConfigLoadOk {}
+
+// Replace the configuration in effect with the compiled-in defaults, writing
+// nothing to persistent storage: writing it out is config.save's job, so the
+message ConfigFactoryReset {}
+
+message ConfigFactoryResetOk {
+  // Whether the configuration left in effect by the reset was written to the
+  // device's persistent storage. The reset replaces the in-effect
+  bool persisted = 1;
+}
+
+// ── test ──
+
+// The test domain: the eight commands the firmware serves under `test.`, as the
+// request each one accepts and the payload it answers a request that succeeded
+
+// ── The six commands a build carries only with the flash facility ──
+
+// Erase the whole SPI flash chip. Dangerous and for testing only.
+//
+message TestChipErase {}
+
+message TestChipEraseOk {}
+
+// Erase the flash sector holding a given address.
+message TestEraseSector {
+  // The address whose sector is erased, as a byte offset into the flash chip.
+  // The firmware hands it to the driver as an address, so it is unsigned here;
+  uint32 addr = 1;
+}
+
+// The refusal of an erase is a value of this command's own and not an arm: a
+// sector erase that fails answers this arm with `ok` false rather than an
+// error arm, because the device reached the chip and the chip said no.
+message TestEraseSectorOk {
+  uint32 addr = 1;  // The address the request named
+  bool   ok   = 2;  // Whether the erase succeeded
+}
+
+// Run the profile store's compaction, which moves the valid entries of the
+// flash wear-leveling ring together and reclaims the rest.
+message TestCompaction {}
+
+// Compaction's success and failure are one arm, like the sector erase's: the
+// reply reports which of the two happened rather than the arm saying it.
+message TestCompactionOk {
+  bool ok = 1;  // Whether the compaction succeeded
+}
+
+// Set the SPI bus mode the flash driver runs in: the peripheral's own mode of
+// operation (which lines the bus uses and how many), not a flash chip command.
+message TestSpiMode {
+  uint32 mode = 1;  // The bus mode to switch to, as the driver's mode enumeration numbers it
+}
+
+message TestSpiModeOk {
+  uint32 mode = 1;  // The mode the device is in after the request, echoing what it was given
+}
+
+// Read bytes from the flash chip, for testing only. The bytes come back as a
+// stream: this arm opens it, the chunk arms carry it, and the end arm closes
+// it, because a run of up to a sector is wider than one frame.
+message TestFlashRead {
+  uint32 addr = 1;  // First address to read from
+  uint32 len  = 2;  // Number of bytes to read, 1 to 4096
+}
+
+// The first arm of a flash read: the run the stream carries and the address it
+// was read from, for a host to hold the pieces and the close against.
+message TestFlashReadStart {
+  uint32 total = 1;  // Number of bytes the stream carries
+  uint32 addr  = 2;  // The address the run was read from
+}
+
+// One piece of a flash read: the offset it starts at and the bytes themselves.
+message TestFlashChunk {
+  uint32 offset = 1;  // Byte offset of the first byte of `data` in the run
+  bytes  data   = 2;  // The piece of the run
+}
+
+// The last arm of a flash read: what the stream carried, for a host to hold
+// against the length the opening arm gave it.
+message TestFlashEnd {
+  uint32 total = 1;  // Number of bytes the stream carried
+  uint32 addr  = 2;  // The address the run was read from
+}
+
+// Program bytes to the flash chip, for testing only. The write is a page
+// program alone: the sector has to be erased before it, and a program reaches
+// a byte that was not erased as a bitwise and rather than as the byte asked
+// for.
+message TestFlashWrite {
+  uint32 addr = 1;  // First address to write to
+  uint32 len  = 2;  // Number of bytes to write
+  bytes  data = 3;  // The bytes to write
+}
+
+// A flash write's own report: the write either reached the chip or it did not,
+// which is a value of this arm and not an arm of its own.
+message TestFlashWriteOk {
+  uint32 addr = 1;  // The address the request named
+  uint32 len  = 2;  // The number of bytes the request named
+  bool   ok   = 3;  // Whether the write reached the chip
+}
+
+// Report what the flash chip is: how large it is, how it is programmed and
+// erased, and whether the driver reached it at all.
+message TestFlashInfo {}
+
+message TestFlashInfoOk {
+  uint32 size_bytes = 1;  // Total size of the chip in bytes
+  uint32 page_size = 2;  // Page program size in bytes
+  uint32 sector_size = 3;  // Erase sector size in bytes
+  bool   init = 4;  // Whether the driver initialized the chip
+}
+
+// ── The two commands every build carries ──
+
+// Raw linker region report: base, end, size and used for the six regions the
+// firmware is laid out in, the RAM reserves, and the live RAM total.
+message TestMemInfo {}
+
+message TestMemInfoOk {
+  uint32 flash_base = 1;
+  uint32 flash_end  = 2;
+  uint32 flash_size = 3;
+  uint32 flash_used = 4;
+  uint32 dtcm_base  = 5;
+  uint32 dtcm_end   = 6;
+  uint32 dtcm_size  = 7;
+  uint32 dtcm_used  = 8;
+  uint32 axi_base   = 9;
+  uint32 axi_end    = 10;
+  uint32 axi_size   = 11;
+  uint32 axi_used   = 12;
+  uint32 d2_base    = 13;
+  uint32 d2_end     = 14;
+  uint32 d2_size    = 15;
+  uint32 d2_used    = 16;
+  uint32 d3_base    = 17;
+  uint32 d3_end     = 18;
+  uint32 d3_size    = 19;
+  uint32 d3_used    = 20;
+  uint32 itcm_base  = 21;
+  uint32 itcm_end   = 22;
+  uint32 itcm_size  = 23;
+  uint32 itcm_used  = 24;
+  uint32 ram_reserved_bytes = 25;  // The part of the live RAM total a fixed reserve already holds
+  uint32 stack_bytes = 26;
+  uint32 heap_bytes  = 27;
+  uint32 ram_live_bytes = 28;  // The RAM in use at this instant, reserves included
+}
+
+// Keypad scan time as the device layer's clock saw it, and the commit counters
+// of the input layer.
+message TestKeypadScan {}
+
+message TestKeypadScanOk {
+  uint32 scan_hz = 1;  // Scan rate of the keypad driver, in hertz
+  uint32 drive_lines = 2;  // Number of drive lines the mat is wired with
+  uint32 sense_lines = 3;  // Number of sense lines the mat is wired with
+  uint32 cycles_per_us = 4;  // The device clock's cycles per microsecond, so a host converts the counts below
+  uint32 count = 5;  // Number of scans taken since boot
+  uint32 last_cycles = 6;  // Duration of the last scan, in cycles
+  uint32 max_cycles = 7;  // Longest scan seen, in cycles
+  uint32 last_us = 8;  // Duration of the last scan, in microseconds
+  uint32 max_us = 9;  // Longest scan seen, in microseconds
+  uint32 commit_count = 10;  // Every committed state change since boot, a press and a release per tap
+  uint32 max_commit_latency_us = 11;  // Longest a level change ever took to commit, in microseconds
+  // The sum of every scan's duration since boot, in cycles. It is a 64-bit
+  // count and stays one here: the reply it was written into had no 64-bit
+  uint64 sum_cycles = 12;
+}
+
+// ── profile ──
+
+// The profile domain: the nine commands the firmware serves under `profile.`,
+// as the request each one accepts, the payload it answers a request that
+
+// ── Begins a profile body's write ──
+
+// Begin writing a profile body: the profile it is written to and how many bytes
+// the body holds.
+message ProfilePutStart {
+  uint32 id    = 1;  // 0 writes the factory profile; 1..15 asks for a user profile, whose id the store assigns
+  uint32 total = 2;  // Number of body bytes the stream carries, 1 to 4096
+}
+
+// The answer to a profile.start body that was written: the profile it reached
+// and how many of its bytes were stored.
+message ProfileStartOk {
+  uint32 id  = 1;
+  uint32 len = 2;  // Number of body bytes stored
+}
+
+// ── Reads a profile body back ──
+
+// Read a profile body back.
+//
+message ProfileGet {
+  // The profile to read, 0 being the factory profile. It is `optional` because
+  // a request that names no id is refused -- "invalid or missing id (0-15)",
+  optional uint32 id = 1;
+}
+
+// The first arm of a body's read: how long the body is and which profile it was
+// read from.
+message ProfileGetStart {
+  uint32 total = 1;  // Number of body bytes the stream carries
+  uint32 id    = 2;  // The profile the body was read from
+}
+
+// One piece of a body: the offset it starts at and the bytes themselves.
+//
+message ProfileChunk {
+  uint32 offset = 1;  // Byte offset of the first byte of `data` in the body
+  bytes  data   = 2;  // The piece of the body
+}
+
+// The last arm of a body's read: what the stream carried, for a host to hold
+// against what it was told at the start.
+message ProfileEnd {
+  uint32 total = 1;  // Number of body bytes the stream carried
+  uint32 id    = 2;  // The profile the body was read from
+}
+
+// ── The store's contents and its active profile ──
+
+// List the profiles the store carries.
+message ProfileList {}
+
+message ProfileListOk {
+  uint32 active = 1;  // Id of the active profile
+  // One entry per profile the store carries, in the store's own order: the
+  // factory profile (id 0) first, then ascending id.
+  repeated ProfileEntry profiles = 2;
+}
+
+// One profile as profile.list reports it: its id and whether it is the active
+// one. The list reply answers with a run of them.
+message ProfileEntry {
+  uint32 id     = 1;  // The profile's id, 0 being the factory profile
+  bool   active = 2;  // Whether this id is the active profile
+}
+
+// Create a profile from a body that arrives as a stream, and say how many bytes
+// the body holds.
+message ProfileCreate {
+  uint32 total = 1;  // Number of body bytes the stream carries, 1 to 4096
+}
+
+// The answer to a profile.create body that was created.
+message ProfileCreateOk {
+  uint32 id  = 1;  // The id the store assigned to the new profile
+  uint32 len = 2;  // Number of body bytes stored
+}
+
+// Delete a profile.
+message ProfileDelete {
+  // The profile to delete, 1..15: the factory profile is not deletable.
+  //
+  uint32 id = 1;
+}
+
+message ProfileDeleteOk {
+  uint32 id = 1;  // The profile that was deleted
+}
+
+// Select a profile as the active one: the profile whose body the configuration
+// the device runs on is read from at the next boot.
+message ProfileSelect {
+  // The profile to select, 0 being the factory profile. `optional` for the
+  // reason profile.get's id is.
+  optional uint32 id = 1;
+}
+
+message ProfileSelectOk {
+  uint32 id = 1;  // The profile that is active after the request
+}
+
+// Report the state of the profile store: the active profile, how many profiles
+// it carries, and how its flash sectors are accounted for.
+message ProfileStatus {}
+
+// Every field is a reading of the store's own status record: the profile it
+// reports, the two ring positions, and how its flash sectors are accounted
+// for.
+message ProfileStatusOk {
+  uint32 active_profile_id = 1;  // The active profile's id
+  uint32 profile_count     = 2;  // Number of valid profiles, the empty ones not counted
+  uint32 next_addr         = 3;  // User Ring address the next body is written to
+  uint32 boot_meta_seq     = 4;  // Sequence number of the current BootMeta entry
+  uint32 address_ring_seq  = 5;  // Sequence number of the current Address Ring entry
+  uint32 total_sectors     = 6;  // Total sectors of the flash chip
+  // Sectors of the User Ring the store has consumed, deletions and abandoned
+  // versions included.
+  uint32 used_sectors      = 7;
+  uint32 free_sectors      = 8;  // Sectors still available in the User Ring
+  uint32 reserved_sectors  = 9;
+}
+
+// ── The stored configuration and the one in effect ──
+
+// Write the configuration the device is running into the profile it belongs to
+// (the active one).
+message ProfileSave {}
+
+message ProfileSaveOk {
+  uint32 id = 1;  // The profile the configuration was written to, which is the active one
+  // How many object keys of the stored body this save replaced and did not
+  // carry over. A save that carried every key over answers no count at all, so
+  optional uint32 dropped_keys = 2;
+}
+
+// Read a profile's body into the configuration the device is running, starting
+// from the compiled-in defaults. The active profile is not changed by it.
+message ProfileLoad {
+  // The profile to read, 0 being the factory profile. It is `optional` because
+  // a request that names no profile loads the active one: the id is not refused
+  optional uint32 id = 1;
+}
+
+message ProfileLoadOk {
+  uint32 id = 1;  // The profile whose body was read in
+}
+
+// ── The two arms a body's write continues in ──
+
+// One piece of a body being written: the offset it starts at and the bytes
+// themselves.
+message ProfilePutChunk {
+  uint32 offset = 1;  // Byte offset of the first byte of `data` in the body
+  bytes  data   = 2;  // The piece of the body
+}
+
+// The end of a body being written: the stream is complete, and the store writes
+// it. Its reply is the opening arm's own success arm, carrying the id the store
+// assigned.
+message ProfilePutEnd {}
+
+// ── request ──
+
+// The request envelope: the command a host asks for, and nothing else. The
+// command and its arguments are the arm's own message, so the field number of
+
+message Request {
+  // The frame's number in the host's stream: the host writes its next number on every
+  // frame, so a reply carries that number plus one and a host sees which frame was never
+  // answered. The device answers a frame it cannot read without a number instead.
+  optional uint32 queued = 32;
+
+  oneof kind {
+    // -- The system domain (1..6) --
+    SysPing         sys_ping           = 1;
+    SysGetFwVersion sys_get_fw_version = 2;
+    SysReset        sys_reset          = 3;
+    SysEnterDfu     sys_enter_dfu      = 4;
+    SysGetTaskInfo  sys_get_task_info  = 5;
+    SysGetUsage     sys_get_usage      = 6;
+
+    // -- The configuration domain (7..12) --
+    ConfigSetKey       config_set_key       = 7;
+    ConfigGetKey       config_get_key       = 8;
+    ConfigListKeys     config_list_keys     = 9;
+    ConfigSave         config_save          = 10;
+    ConfigLoad         config_load          = 11;
+    ConfigFactoryReset config_factory_reset = 12;
+
+    // -- The test domain (13..20) --
+    TestChipErase   test_chip_erase   = 13;
+    TestEraseSector test_erase_sector = 14;
+    TestCompaction  test_compaction   = 15;
+    TestSpiMode     test_spi_mode     = 16;
+    TestFlashRead   test_flash_read   = 17;
+    TestFlashInfo   test_flash_info   = 18;
+    TestMemInfo     test_mem_info     = 19;
+    TestKeypadScan  test_keypad_scan  = 20;
+
+    // -- The profile domain (21..29) --
+    ProfilePutStart profile_start  = 21;
+    ProfileGet      profile_get    = 22;
+    ProfileList     profile_list   = 23;
+    ProfileCreate   profile_create = 24;
+    ProfileDelete   profile_delete = 25;
+    ProfileSelect   profile_select = 26;
+    ProfileStatus   profile_status = 27;
+    ProfileSave     profile_save   = 28;
+    ProfileLoad     profile_load   = 29;
+
+    // -- The two arms a body's write continues in (30/31) --
+    // Shared by profile.start and profile.create: the opening arm (21 or 24)
+    ProfilePutChunk profile_put_chunk = 30;
+    ProfilePutEnd   profile_put_end   = 31;
+
+    // -- The test domain's flash write (33) --
+    // It programs one frame's worth of bytes; a longer run repeats the arm.
+    TestFlashWrite test_flash_write = 33;
+  }
+}
+
+// ── reply ──
+
+// The reply envelope: how many further requests the device has accepted on the
+// same connection, then exactly one of a transport failure, a command failure
+
+message Reply {
+  // The request's queued value plus one, echoed so a host pairs a reply with
+  // its request. A staged write is answered once, when it is written: its
+  // answer carries zero, because it answers the exchange and not one frame.
+  optional uint32 queued = 34;
+
+  oneof kind {
+    // The request could not be read at all -- a checksum that did not hold, an
+    // illegal length prefix, a half frame that timed out: no command to name,
+    TransportError transport_error = 1;
+    // The request was read and the command failed: this arm also carries the
+    // failures with no command of their own -- an arm the firmware does not
+    Error error = 2;
+
+    // -- The system domain's success arms (3..8) --
+    SysPingOk         sys_ping           = 3;
+    SysGetFwVersionOk sys_get_fw_version = 4;
+    SysResetOk        sys_reset          = 5;
+    SysEnterDfuOk     sys_enter_dfu      = 6;
+    SysGetTaskInfoOk  sys_get_task_info  = 7;
+    SysGetUsageOk     sys_get_usage      = 8;
+
+    // -- The configuration domain's success arms (9..14) --
+    ConfigSetKeyOk       config_set_key       = 9;
+    ConfigGetKeyOk       config_get_key       = 10;
+    ConfigListKeysOk     config_list_keys     = 11;
+    ConfigSaveOk         config_save          = 12;
+    ConfigLoadOk         config_load          = 13;
+    ConfigFactoryResetOk config_factory_reset = 14;
+
+    // -- The test domain's success arms (15..22) --
+    TestChipEraseOk   test_chip_erase   = 15;
+    TestEraseSectorOk test_erase_sector = 16;
+    TestCompactionOk  test_compaction   = 17;
+    TestSpiModeOk     test_spi_mode     = 18;
+    TestFlashReadStart test_flash_read  = 19;
+    TestFlashInfoOk   test_flash_info   = 20;
+    TestMemInfoOk     test_mem_info     = 21;
+    TestKeypadScanOk  test_keypad_scan  = 22;
+
+    // -- The profile domain's success arms (23..31) --
+    ProfileStartOk  profile_start  = 23;
+    ProfileGetStart profile_get    = 24;
+    ProfileListOk   profile_list   = 25;
+    ProfileCreateOk profile_create = 26;
+    ProfileDeleteOk profile_delete = 27;
+    ProfileSelectOk profile_select = 28;
+    ProfileStatusOk profile_status = 29;
+    ProfileSaveOk   profile_save   = 30;
+    ProfileLoadOk   profile_load   = 31;
+
+    // -- The two arms a body's read continues in (32/33) --
+    // profile.get's read answers with these after its opening arm (24): the
+    ProfileChunk profile_chunk = 32;
+    ProfileEnd   profile_end   = 33;
+
+    // -- The test domain's flash write and read continuations (35..37) --
+    // A flash write answers with its own arm (35), and a flash read answers
+    // with its opening arm (19) and then with these two.
+    TestFlashWriteOk test_flash_write = 35;
+    TestFlashChunk   test_flash_chunk = 36;
+    TestFlashEnd     test_flash_end   = 37;
+  }
+}
+

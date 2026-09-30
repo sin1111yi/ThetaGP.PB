@@ -1,0 +1,6 @@
+# Generated artifacts — never committed. A consumer's build writes them into its
+# own tree; a run of generate.py here would leave them beside the schema.
+*.pb.c
+*.pb.h
+*_pb2.py
+__pycache__/

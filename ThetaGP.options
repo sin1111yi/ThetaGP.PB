@@ -1,0 +1,19 @@
+// Field bounds: every string and repeated field the wire carries has one,
+// so a decoded message is a fixed-size struct.
+
+ThetaGP.MemoryRegion.name    max_size:32
+ThetaGP.ConfigKeyEntry.key   max_size:25
+ThetaGP.SysGetFwVersionOk.board      max_size:32
+ThetaGP.SysGetFwVersionOk.version    max_size:32
+ThetaGP.SysGetFwVersionOk.build_date max_size:32
+ThetaGP.SysGetFwVersionOk.build_time max_size:32
+ThetaGP.SysGetTaskInfoOk.name        max_size:32
+ThetaGP.SysGetTaskInfoOk.sub         max_size:32
+ThetaGP.SysGetUsageOk.regions        max_count:6
+ThetaGP.Int32Array.elements       max_count:32
+ThetaGP.ConfigSetKey.key          max_size:25
+ThetaGP.ConfigSetKeyOk.key        max_size:25
+ThetaGP.ConfigGetKey.key          max_size:25
+ThetaGP.ConfigGetKeyOk.key        max_size:25
+ThetaGP.ConfigListKeysOk.keys     max_count:12
+ThetaGP.ProfileListOk.profiles   max_count:16
