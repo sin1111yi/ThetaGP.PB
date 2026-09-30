@@ -97,7 +97,7 @@ def generate_c(args) -> int:
                              if env.get("PYTHONPATH") else runtime)
 
     os.makedirs(out_dir, exist_ok=True)
-    stem = os.path.splitext(WIRE_SCHEMA)[0]
+    stem = os.path.splitext(os.path.basename(WIRE_SCHEMA))[0]
     outputs = [os.path.join(out_dir, stem + ".pb.c"),
                os.path.join(out_dir, stem + ".pb.h")]
 
@@ -105,7 +105,7 @@ def generate_c(args) -> int:
         # The generator builds the python bindings of nanopb's own options file
         # beside its sources by default; the temp directory keeps that write.
         env["NANOPB_PB2_TEMP_DIR"] = tmp
-        cmd = [sys.executable, generator, "-I", REPO_ROOT,
+        cmd = [sys.executable, generator, "-I", os.path.dirname(schema),
                "--output-dir=" + out_dir, schema]
         print("$ " + " ".join(cmd))
         result = subprocess.run(cmd, cwd=REPO_ROOT, env=env,
@@ -136,7 +136,9 @@ def generate_python(args) -> int:
              "plugin of protoc is what writes the bindings)", 2)
 
     os.makedirs(out_dir, exist_ok=True)
-    cmd = [protoc, "--python_out=" + out_dir, "-I", REPO_ROOT, WIRE_SCHEMA]
+    name = os.path.basename(schema)
+    cmd = [protoc, "--python_out=" + out_dir, "-I", os.path.dirname(schema),
+           name]
     print("$ " + " ".join(cmd))
     result = run_generation(cmd)
     if result.stdout.strip():
@@ -144,7 +146,7 @@ def generate_python(args) -> int:
     if result.returncode != 0:
         fail("protoc exited %d" % result.returncode, 1)
 
-    binding = os.path.join(out_dir, os.path.splitext(WIRE_SCHEMA)[0] + "_pb2.py")
+    binding = os.path.join(out_dir, os.path.splitext(name)[0] + "_pb2.py")
     if not check_nonempty(binding, "protoc"):
         return 1
     print("wrote " + binding)
