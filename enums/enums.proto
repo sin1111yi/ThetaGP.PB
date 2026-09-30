@@ -1,0 +1,715 @@
+syntax = "proto3";
+
+package ThetaGP;
+
+// ── ThetaGP's own enums ──
+
+enum DpadDirection {
+    DpadDirection_None = 0;
+    DpadDirection_Up = 1;
+    DpadDirection_Down = 2;
+    DpadDirection_Left = 3;
+    DpadDirection_Right = 4;
+}
+
+enum SOCDMode {
+    SOCDMode_UpPriority = 0;
+    SOCDMode_Neutral = 1;
+    SOCDMode_SecondInputPriority = 2;
+    SOCDMode_FirstInputPriority = 3;
+    SOCDMode_Bypass = 4;
+}
+
+enum GPHotKey {
+    GPHotKey_None = 0;
+    GPHotKey_DpadDigital = 1;
+    GPHotKey_DpadLeftAnalog = 2;
+    GPHotKey_DpadRightAnalog = 3;
+    GPHotKey_HomeButton = 4;
+    GPHotKey_CaptureButton = 5;
+    GPHotKey_InvertXAxis = 6;
+    GPHotKey_InvertYAxis = 7;
+    GPHotKey_Toggle4WayMode = 8;
+    GPHotKey_ToggleDDI4WayMode = 9;
+    GPHotKey_SOCDUpPriority = 10;
+    GPHotKey_SOCDNeutral = 11;
+    GPHotKey_SOCDLastInput = 12;
+    GPHotKey_SOCDFirstInput = 13;
+    GPHotKey_SOCDBypass = 14;
+    GPHotKey_LoadProfile1 = 15;
+    GPHotKey_LoadProfile2 = 16;
+    GPHotKey_LoadProfile3 = 17;
+    GPHotKey_LoadProfile4 = 18;
+    GPHotKey_LoadProfile5 = 19;
+    GPHotKey_LoadProfile6 = 20;
+    GPHotKey_LoadProfile7 = 21;
+    GPHotKey_LoadProfile8 = 22;
+    GPHotKey_ButtonL3 = 23;
+    GPHotKey_ButtonR3 = 24;
+    GPHotKey_ButtonTpad = 25;
+    GPHotKey_ButtonRebootDefault = 26;
+    GPHotKey_ButtonB1 = 27;
+    GPHotKey_ButtonB2 = 28;
+    GPHotKey_ButtonB3 = 29;
+    GPHotKey_ButtonB4 = 30;
+    GPHotKey_L1Button = 31;
+    GPHotKey_R1Button = 32;
+    GPHotKey_L2Button = 33;
+    GPHotKey_R2Button = 34;
+    GPHotKey_S1Button = 35;
+    GPHotKey_S2Button = 36;
+    GPHotKey_A1Button = 37;
+    GPHotKey_A2Button = 38;
+    GPHotKey_A3Button = 39;
+    GPHotKey_A4Button = 40;
+    GPHotKey_NextProfile = 41;
+    GPHotKey_PreviousProfile = 42;
+    GPHotKey_DpadUp = 43;
+    GPHotKey_DpadDown = 44;
+    GPHotKey_DpadLeft = 45;
+    GPHotKey_DpadRight = 46;
+    GPHotKey_SaveConfig = 47;
+    GPHotKey_MenuNavUp = 48;
+    GPHotKey_MenuNavDown = 49;
+    GPHotKey_MenuNavLeft = 50;
+    GPHotKey_MenuNavRight = 51;
+    GPHotKey_MenuNavSelect = 52;
+    GPHotKey_MenuNavBack = 53;
+    GPHotKey_MenuNavToggle = 54;
+    GPHotKey_LedsNone = 55;
+    GPHotKey_LedsAnimationUp = 56;
+    GPHotKey_LedsAnimationDown = 57;
+    GPHotKey_LedsParameterUp = 58;
+    GPHotKey_LedsPressParameterUp = 59;
+    GPHotKey_LedsPressParameterDown = 60;
+    GPHotKey_LedsParameterDown = 61;
+    GPHotKey_LedsBrightnessUp = 62;
+    GPHotKey_LedsBrightnessDown = 63;
+    GPHotKey_LedsFadeTimeUp = 64;
+    GPHotKey_LedsFadeTimeDown = 65;
+    GPHotKey_AmbientLightEffectsChange = 66;
+    GPHotKey_AmbientLightEffectsOnOff = 67;
+    GPHotKey_AmbientLightEffectsBrightnessUp = 68;
+    GPHotKey_AmbientLightEffectsBrightnessDown = 69;
+    GPHotKey_AmbientLightEffectsParameterUp = 70;
+    GPHotKey_AmbientLightEffectsParameterDown = 71;
+    GPHotKey_AmbientLightEffectsFrameSpeedUp = 72;
+    GPHotKey_AmbientLightEffectsFrameSpeedDown = 73;
+    GPHotKey_AmbientLightEffectsCustomLinkage = 74;
+    GPHotKey_Enable4WayMode = 75;
+    GPHotKey_Disable4WayMode = 76;
+    GPHotKey_TurboCountUp = 77;
+    GPHotKey_TurboCountDown = 78;
+    GPHotKey_FocusModeToggle = 79;
+    GPHotKey_LSUp = 80;
+    GPHotKey_LSDown = 81;
+    GPHotKey_LSLeft = 82;
+    GPHotKey_LSRight = 83;
+    GPHotKey_RSUp = 84;
+    GPHotKey_RSDown = 85;
+    GPHotKey_RSLeft = 86;
+    GPHotKey_RSRight = 87;
+}
+
+enum ButtonAction {
+    ButtonAction_None = 0;
+    ButtonAction_Reserved = 1;
+    ButtonAction_AssignedToAddon = 2;
+    ButtonAction_ButtonPressUp = 3;
+    ButtonAction_ButtonPressDown = 4;
+    ButtonAction_ButtonPressLeft = 5;
+    ButtonAction_ButtonPressRight = 6;
+    ButtonAction_ButtonPressB1 = 7;
+    ButtonAction_ButtonPressB2 = 8;
+    ButtonAction_ButtonPressB3 = 9;
+    ButtonAction_ButtonPressB4 = 10;
+    ButtonAction_ButtonPressL1 = 11;
+    ButtonAction_ButtonPressR1 = 12;
+    ButtonAction_ButtonPressL2 = 13;
+    ButtonAction_ButtonPressR2 = 14;
+    ButtonAction_ButtonPressS1 = 15;
+    ButtonAction_ButtonPressS2 = 16;
+    ButtonAction_ButtonPressA1 = 17;
+    ButtonAction_ButtonPressA2 = 18;
+    ButtonAction_ButtonPressL3 = 19;
+    ButtonAction_ButtonPressR3 = 20;
+    ButtonAction_ButtonPressFn = 21;
+    ButtonAction_ButtonPressDdiUp = 22;
+    ButtonAction_ButtonPressDdiDown = 23;
+    ButtonAction_ButtonPressDdiLeft = 24;
+    ButtonAction_ButtonPressDdiRight = 25;
+    ButtonAction_SustainDpModeDp = 26;
+    ButtonAction_SustainDpModeLs = 27;
+    ButtonAction_SustainDpModeRs = 28;
+    ButtonAction_SustainSocdModeUpPrio = 29;
+    ButtonAction_SustainSocdModeNeutral = 30;
+    ButtonAction_SustainSocdModeSecondWin = 31;
+    ButtonAction_SustainSocdModeFirstWin = 32;
+    ButtonAction_SustainSocdModeBypass = 33;
+    ButtonAction_ButtonPressTurbo = 34;
+    ButtonAction_ButtonPressMacro = 35;
+    ButtonAction_ButtonPressMacro1 = 36;
+    ButtonAction_ButtonPressMacro2 = 37;
+    ButtonAction_ButtonPressMacro3 = 38;
+    ButtonAction_ButtonPressMacro4 = 39;
+    ButtonAction_ButtonPressMacro5 = 40;
+    ButtonAction_ButtonPressMacro6 = 41;
+    ButtonAction_CustomButtonCombo = 42;
+    ButtonAction_ButtonPressA3 = 43;
+    ButtonAction_ButtonPressA4 = 44;
+    ButtonAction_ButtonPressE1 = 45;
+    ButtonAction_ButtonPressE2 = 46;
+    ButtonAction_ButtonPressE3 = 47;
+    ButtonAction_ButtonPressE4 = 48;
+    ButtonAction_ButtonPressE5 = 49;
+    ButtonAction_ButtonPressE6 = 50;
+    ButtonAction_ButtonPressE7 = 51;
+    ButtonAction_ButtonPressE8 = 52;
+    ButtonAction_ButtonPressE9 = 53;
+    ButtonAction_ButtonPressE10 = 54;
+    ButtonAction_ButtonPressE11 = 55;
+    ButtonAction_ButtonPressE12 = 56;
+    ButtonAction_DigitalDirectionUp = 57;
+    ButtonAction_DigitalDirectionDown = 58;
+    ButtonAction_DigitalDirectionLeft = 59;
+    ButtonAction_DigitalDirectionRight = 60;
+    ButtonAction_AnalogDirectionLsXNeg = 61;
+    ButtonAction_AnalogDirectionLsXPos = 62;
+    ButtonAction_AnalogDirectionLsYNeg = 63;
+    ButtonAction_AnalogDirectionLsYPos = 64;
+    ButtonAction_AnalogDirectionRsXNeg = 65;
+    ButtonAction_AnalogDirectionRsXPos = 66;
+    ButtonAction_AnalogDirectionRsYNeg = 67;
+    ButtonAction_AnalogDirectionRsYPos = 68;
+    ButtonAction_AnalogDirectionModLow = 69;
+    ButtonAction_AnalogDirectionModHigh = 70;
+    ButtonAction_ButtonPressInputReverse = 71;
+    ButtonAction_SustainFocusMode = 72;
+    ButtonAction_Sustain48WayMode = 73;
+    ButtonAction_MenuNavigationUp = 74;
+    ButtonAction_MenuNavigationDown = 75;
+    ButtonAction_MenuNavigationLeft = 76;
+    ButtonAction_MenuNavigationRight = 77;
+    ButtonAction_MenuNavigationSelect = 78;
+    ButtonAction_MenuNavigationBack = 79;
+    ButtonAction_MenuNavigationToggle = 80;
+    ButtonAction_ModeGuitarFretGreen = 81;
+    ButtonAction_ModeGuitarFretRed = 82;
+    ButtonAction_ModeGuitarFretYellow = 83;
+    ButtonAction_ModeGuitarFretBlue = 84;
+    ButtonAction_ModeGuitarFretOrange = 85;
+    ButtonAction_ModeGuitarFretSoloGreen = 86;
+    ButtonAction_ModeGuitarFretSoloRed = 87;
+    ButtonAction_ModeGuitarFretSoloYellow = 88;
+    ButtonAction_ModeGuitarFretSoloBlue = 89;
+    ButtonAction_ModeGuitarFretSoloOrange = 90;
+    ButtonAction_ModeGuitarWhammy = 91;
+    ButtonAction_ModeGuitarPickup = 92;
+    ButtonAction_ModeGuitarTilt = 93;
+    ButtonAction_ModeDrumRedDrumpad = 94;
+    ButtonAction_ModeDrumBlueDrumpad = 95;
+    ButtonAction_ModeDrumYellowDrumpad = 96;
+    ButtonAction_ModeDrumGreenDrumpad = 97;
+    ButtonAction_ModeDrumYellowCymbal = 98;
+    ButtonAction_ModeDrumBlueCymbal = 99;
+    ButtonAction_ModeDrumGreenCymbal = 100;
+    ButtonAction_ModeDrumKickPedalLeft = 101;
+    ButtonAction_ModeDrumKickPedalRight = 102;
+    ButtonAction_ModeHotasRudderLeft = 103;
+    ButtonAction_ModeHotasRudderRight = 104;
+    ButtonAction_ModeHotasThrottleForward = 105;
+    ButtonAction_ModeHotasThrottleReverse = 106;
+    ButtonAction_ModeHotasRockerLeft = 107;
+    ButtonAction_ModeHotasRockerRight = 108;
+    ButtonAction_ModeHotasPedalLeft = 109;
+    ButtonAction_ModeHotasPedalRight = 110;
+    ButtonAction_ModeHotasPedalRudderLeft = 111;
+    ButtonAction_ModeHotasPedalRudderRight = 112;
+    ButtonAction_ModeWheelSteeringLeft = 113;
+    ButtonAction_ModeWheelSteeringRight = 114;
+    ButtonAction_ModeWheelShifterGear1 = 115;
+    ButtonAction_ModeWheelShifterGear2 = 116;
+    ButtonAction_ModeWheelShifterGear3 = 117;
+    ButtonAction_ModeWheelShifterGear4 = 118;
+    ButtonAction_ModeWheelShifterGear5 = 119;
+    ButtonAction_ModeWheelShifterGear6 = 120;
+    ButtonAction_ModeWheelShifterGearR = 121;
+    ButtonAction_ModeWheelShifterGearN = 122;
+    ButtonAction_ModeWheelShifterGearUp = 123;
+    ButtonAction_ModeWheelShifterGearDown = 124;
+    ButtonAction_ModeWheelButtonPlus = 125;
+    ButtonAction_ModeWheelButtonMinus = 126;
+    ButtonAction_ModeWheelDialUp = 127;
+    ButtonAction_ModeWheelDialDown = 128;
+    ButtonAction_ModeWheelDialEnter = 129;
+    ButtonAction_ModeWheelPedalGas = 130;
+    ButtonAction_ModeWheelPedalBrake = 131;
+    ButtonAction_ModeWheelPedalClutch = 132;
+}
+
+// ── Ported from GP2040-CE's enums.proto, adapted to proto3 ──
+
+enum ButtonLayout
+{
+
+    BUTTON_LAYOUT_STICK = 0;
+    BUTTON_LAYOUT_STICKLESS = 1;
+    BUTTON_LAYOUT_BUTTONS_ANGLED = 2;
+    BUTTON_LAYOUT_BUTTONS_BASIC = 3;
+    BUTTON_LAYOUT_KEYBOARD_ANGLED = 4;
+    BUTTON_LAYOUT_KEYBOARDA = 5;
+    BUTTON_LAYOUT_DANCEPADA = 6;
+    BUTTON_LAYOUT_TWINSTICKA = 7;
+    BUTTON_LAYOUT_BLANKA = 8;
+    BUTTON_LAYOUT_VLXA = 9;
+    BUTTON_LAYOUT_FIGHTBOARD_STICK = 10;
+    BUTTON_LAYOUT_FIGHTBOARD_MIRRORED = 11;
+    BUTTON_LAYOUT_CUSTOMA = 12;
+    BUTTON_LAYOUT_OPENCORE0WASDA = 13;
+    BUTTON_LAYOUT_STICKLESS_13 = 14;
+    BUTTON_LAYOUT_STICKLESS_16 = 15;
+    BUTTON_LAYOUT_STICKLESS_14 = 16;
+    BUTTON_LAYOUT_DANCEPAD_DDR_LEFT = 17;
+    BUTTON_LAYOUT_DANCEPAD_DDR_SOLO = 18;
+    BUTTON_LAYOUT_DANCEPAD_PIU_LEFT = 19;
+    BUTTON_LAYOUT_POPN_A = 20;
+    BUTTON_LAYOUT_TAIKO_A = 21;
+    BUTTON_LAYOUT_BM_TURNTABLE_A = 22;
+    BUTTON_LAYOUT_BM_5KEY_A = 23;
+    BUTTON_LAYOUT_BM_7KEY_A = 24;
+    BUTTON_LAYOUT_GITADORA_FRET_A = 25;
+    BUTTON_LAYOUT_GITADORA_STRUM_A = 26;
+    BUTTON_LAYOUT_BOARD_DEFINED_A = 27;
+    BUTTON_LAYOUT_BANDHERO_FRET_A = 28;
+    BUTTON_LAYOUT_BANDHERO_STRUM_A = 29;
+    BUTTON_LAYOUT_6GAWD_A = 30;
+    BUTTON_LAYOUT_6GAWD_ALLBUTTON_A = 31;
+    BUTTON_LAYOUT_6GAWD_ALLBUTTONPLUS_A = 32;
+    BUTTON_LAYOUT_STICKLESS_R16 = 33;
+    BUTTON_LAYOUT_BOARD_DEFINED_ALT0_A = 34;
+    BUTTON_LAYOUT_BOARD_DEFINED_ALT1_A = 35;
+    BUTTON_LAYOUT_BOARD_DEFINED_ALT2_A = 36;
+    BUTTON_LAYOUT_BOARD_DEFINED_ALT3_A = 37;
+    BUTTON_LAYOUT_BOARD_DEFINED_ALT4_A = 38;
+    BUTTON_LAYOUT_BOARD_DEFINED_ALT5_A = 39;
+    BUTTON_LAYOUT_BOARD_DEFINED_ALT6_A = 40;
+    BUTTON_LAYOUT_BOARD_DEFINED_ALT7_A = 41;
+}
+
+enum ButtonLayoutRight
+{
+
+    BUTTON_LAYOUT_ARCADE = 0;
+    BUTTON_LAYOUT_STICKLESSB = 1;
+    BUTTON_LAYOUT_BUTTONS_ANGLEDB = 2;
+    BUTTON_LAYOUT_VEWLIX = 3;
+    BUTTON_LAYOUT_VEWLIX7 = 4;
+    BUTTON_LAYOUT_CAPCOM = 5;
+    BUTTON_LAYOUT_CAPCOM6 = 6;
+    BUTTON_LAYOUT_SEGA2P = 7;
+    BUTTON_LAYOUT_NOIR8 = 8;
+    BUTTON_LAYOUT_KEYBOARDB = 9;
+    BUTTON_LAYOUT_DANCEPADB = 10;
+    BUTTON_LAYOUT_TWINSTICKB = 11;
+    BUTTON_LAYOUT_BLANKB = 12;
+    BUTTON_LAYOUT_VLXB = 13;
+    BUTTON_LAYOUT_FIGHTBOARD = 14;
+    BUTTON_LAYOUT_FIGHTBOARD_STICK_MIRRORED = 15;
+    BUTTON_LAYOUT_CUSTOMB = 16;
+    BUTTON_LAYOUT_KEYBOARD8B = 17;
+    BUTTON_LAYOUT_OPENCORE0WASDB = 18;
+    BUTTON_LAYOUT_STICKLESS_13B = 19;
+    BUTTON_LAYOUT_STICKLESS_16B = 20;
+    BUTTON_LAYOUT_STICKLESS_14B = 21;
+    BUTTON_LAYOUT_DANCEPAD_DDR_RIGHT = 22;
+    BUTTON_LAYOUT_DANCEPAD_PIU_RIGHT = 23;
+    BUTTON_LAYOUT_POPN_B = 24;
+    BUTTON_LAYOUT_TAIKO_B = 25;
+    BUTTON_LAYOUT_BM_TURNTABLE_B = 26;
+    BUTTON_LAYOUT_BM_5KEY_B = 27;
+    BUTTON_LAYOUT_BM_7KEY_B = 28;
+    BUTTON_LAYOUT_GITADORA_FRET_B = 29;
+    BUTTON_LAYOUT_GITADORA_STRUM_B = 30;
+    BUTTON_LAYOUT_BOARD_DEFINED_B = 31;
+    BUTTON_LAYOUT_BANDHERO_FRET_B = 32;
+    BUTTON_LAYOUT_BANDHERO_STRUM_B = 33;
+    BUTTON_LAYOUT_6GAWD_B = 34;
+    BUTTON_LAYOUT_6GAWD_ALLBUTTON_B = 35;
+    BUTTON_LAYOUT_6GAWD_ALLBUTTONPLUS_B = 36;
+    BUTTON_LAYOUT_STICKLESS_R16B = 37;
+    BUTTON_LAYOUT_VLXB_6B = 38;
+    BUTTON_LAYOUT_SEGA2P_6B = 39;
+    BUTTON_LAYOUT_BOARD_DEFINED_ALT0_B = 40;
+    BUTTON_LAYOUT_BOARD_DEFINED_ALT1_B = 41;
+    BUTTON_LAYOUT_BOARD_DEFINED_ALT2_B = 42;
+    BUTTON_LAYOUT_BOARD_DEFINED_ALT3_B = 43;
+    BUTTON_LAYOUT_BOARD_DEFINED_ALT4_B = 44;
+    BUTTON_LAYOUT_BOARD_DEFINED_ALT5_B = 45;
+    BUTTON_LAYOUT_BOARD_DEFINED_ALT6_B = 46;
+    BUTTON_LAYOUT_BOARD_DEFINED_ALT7_B = 47;
+}
+
+enum SplashMode
+{
+
+    SPLASH_MODE_STATIC = 0;
+    SPLASH_MODE_RESERVED_01 = 1;
+    SPLASH_MODE_RESERVED_02 = 2;
+    SPLASH_MODE_NONE = 3;
+}
+
+enum SplashChoice
+{
+
+    SPLASH_CHOICE_MAIN = 0;
+    SPLASH_CHOICE_X = 1;
+    SPLASH_CHOICE_Y = 2;
+    SPLASH_CHOICE_Z = 3;
+    SPLASH_CHOICE_CUSTOM = 4;
+    SPLASH_CHOICE_LEGACY = 5;
+}
+
+enum OnBoardLedMode
+{
+
+    ON_BOARD_LED_MODE_OFF = 0;
+    ON_BOARD_LED_MODE_MODE_INDICATOR = 1;
+    ON_BOARD_LED_MODE_INPUT_TEST = 2;
+    ON_BOARD_LED_MODE_PS_AUTH = 3;
+}
+
+enum InputMode
+{
+
+    INPUT_MODE_XINPUT = 0;
+    INPUT_MODE_SWITCH = 1;
+    INPUT_MODE_PS3 = 2;
+    INPUT_MODE_KEYBOARD = 3;
+    INPUT_MODE_PS4 = 4;
+    INPUT_MODE_XBONE = 5;
+    INPUT_MODE_MDMINI = 6;
+    INPUT_MODE_NEOGEO = 7;
+    INPUT_MODE_PCEMINI = 8;
+    INPUT_MODE_EGRET = 9;
+    INPUT_MODE_ASTRO = 10;
+    INPUT_MODE_PSCLASSIC = 11;
+    INPUT_MODE_XBOXORIGINAL = 12;
+    INPUT_MODE_PS5 = 13;
+    INPUT_MODE_GENERIC = 14;
+    INPUT_MODE_SWITCH_PRO = 15;
+    INPUT_MODE_P5GENERAL = 16;
+    INPUT_MODE_SINPUT = 17;
+    INPUT_MODE_CONFIG = 255;
+}
+
+enum InputModeAuthType
+{
+
+    INPUT_MODE_AUTH_TYPE_NONE = 0;
+    INPUT_MODE_AUTH_TYPE_KEYS = 1;
+    INPUT_MODE_AUTH_TYPE_USB = 2;
+    INPUT_MODE_AUTH_TYPE_I2C = 3;
+}
+
+enum InputModeDeviceType
+{
+
+    INPUT_MODE_DEVICE_TYPE_GAMEPAD = 0;
+    INPUT_MODE_DEVICE_TYPE_WHEEL = 1;
+    INPUT_MODE_DEVICE_TYPE_HOTAS = 2;
+    INPUT_MODE_DEVICE_TYPE_GUITAR = 3;
+    INPUT_MODE_DEVICE_TYPE_DRUM = 4;
+    INPUT_MODE_DEVICE_TYPE_MECHA = 5;
+    INPUT_MODE_DEVICE_TYPE_ARCADE_STICK = 6;
+    INPUT_MODE_DEVICE_TYPE_GAMEPAD_ALT = 7;
+}
+
+enum DpadMode
+{
+
+    DPAD_MODE_DIGITAL = 0;
+    DPAD_MODE_LEFT_ANALOG = 1;
+    DPAD_MODE_RIGHT_ANALOG = 2;
+}
+
+enum InvertMode
+{
+
+    INVERT_NONE = 0;
+    INVERT_X = 1;
+    INVERT_Y = 2;
+    INVERT_XY = 3;
+}
+
+
+
+enum GpioDirection
+{
+
+    GPIO_DIRECTION_INPUT = 0;
+    GPIO_DIRECTION_OUTPUT = 1;
+}
+
+
+// This has to be kept in sync with LEDFormat in NeoPico.h
+enum LEDFormat
+{
+    LED_FORMAT_GRB = 0;
+    LED_FORMAT_RGB = 1;
+    LED_FORMAT_GRBW = 2;
+    LED_FORMAT_RGBW = 3;
+}
+
+/* This has to be kept in sync with AnimationNonPressedEffects in AnimationStation.hpp */
+enum AnimationNonPressedEffects
+{
+  EFFECT_STATIC_COLOR = 0;
+  EFFECT_RAINBOW_SYNCED = 1;
+  EFFECT_RAINBOW_ROTATE = 2;
+  EFFECT_CHASE_INDEX = 3;
+  EFFECT_CHASE_SEQUENTIAL = 4;
+  EFFECT_CHASE_CIRCLE_CLOCKWISE = 5;
+  EFFECT_CHASE_CIRCLE_ANTICLOCKWISE = 6;
+  EFFECT_CHASE_LEFT_TO_RIGHT = 7;
+  EFFECT_CHASE_RIGHT_TO_LEFT = 8;
+  EFFECT_CHASE_TOP_TO_BOTTOM = 9;
+  EFFECT_CHASE_BOTTOM_TO_TOP = 10;
+  EFFECT_CHASE_INDEX_PINGPONG = 11;
+  EFFECT_CHASE_SEQUENTIAL_PINGPONG = 12;
+  EFFECT_CHASE_CIRCLE_PINGPONG = 13;
+  EFFECT_CHASE_HORIZONTAL_PINGPONG = 14;
+  EFFECT_CHASE_VERTICAL_PINGPONG = 15;
+  EFFECT_CHASE_RANDOM = 16;
+  EFFECT_JIGGLESTATIC = 17;
+  EFFECT_JIGGLETWOSTATICS = 18;
+  EFFECT_RAIN = 19;
+}
+
+/* This has to be kept in sync with AnimationPressedEffects in AnimationStation.hpp */
+enum AnimationPressedEffects
+{
+  PRESSEDEFFECT_STATIC_COLOR = 0;
+  PRESSEDEFFECT_RANDOM = 1;
+  PRESSEDEFFECT_JIGGLESTATIC = 2;
+  PRESSEDEFFECT_JIGGLETWOSTATICS = 3;
+  PRESSEDEFFECT_BURST = 4;
+  PRESSEDEFFECT_BURST_SMALL = 5;
+}
+
+/* This has to be kept in sync with LightType in Pixel.hpp */
+enum LightType
+{
+    ActionButton = 0;
+    Case = 1;
+    Turbo = 2;
+    Player1Light = 3;
+    Player2Light = 4;
+    Player3Light = 5;
+    Player4Light = 6;
+}
+
+enum ShmupMixMode
+{
+
+    SHMUP_MIX_MODE_TURBO_PRIORITY = 0;
+    SHMUP_MIX_MODE_CHARGE_PRIORITY = 1;
+}
+
+enum PLEDType
+{
+    PLED_TYPE_PWM = 0;
+    PLED_TYPE_NONE = -1;
+    PLED_TYPE_RGB = 1;
+};
+
+enum CaseRGBType
+{
+    CASE_RGB_TYPE_AMBIENT = 0;
+    CASE_RGB_TYPE_NONE = -1;
+    CASE_RGB_TYPE_LINKED = 1;
+};
+
+enum AmbientEffectType
+{
+
+    AL_CUSTOM_EFFECT_STATIC_COLOR = 0; // Static
+    AL_CUSTOM_EFFECT_GRADIENT = 1; // Gradient Color
+    AL_CUSTOM_EFFECT_CHASE = 2; // Chase
+    AL_CUSTOM_EFFECT_BREATH = 3; // Breathing
+    AL_CUSTOM_EFFECT_STATIC_THEME = 4; // Custom Static
+};
+
+enum AnimationColor // Sync with Animation.h
+{
+
+    ANIMATION_COLOR_BLACK = 0;
+    ANIMATION_COLOR_WHITE = 1;
+    ANIMATION_COLOR_RED = 2;
+    ANIMATION_COLOR_ORANGE = 3;
+    ANIMATION_COLOR_YELLOW = 4;
+    ANIMATION_COLOR_LIMEGREEN = 5;
+    ANIMATION_COLOR_GREEN = 6;
+    ANIMATION_COLOR_SEAFOAM = 7;
+    ANIMATION_COLOR_AQUA = 8;
+    ANIMATION_COLOR_SKYBLUE = 9;
+    ANIMATION_COLOR_BLUE = 10;
+    ANIMATION_COLOR_PURPLE = 11;
+    ANIMATION_COLOR_PINK = 12;
+    ANIMATION_COLOR_MAGENTA = 13;
+    ANIMATION_COLOR_INDIGO = 14;
+    ANIMATION_COLOR_VIOLET = 15;
+};
+
+enum ForcedSetupMode
+{
+
+	FORCED_SETUP_MODE_OFF = 0;
+	FORCED_SETUP_MODE_LOCK_MODE_SWITCH = 1;
+	FORCED_SETUP_MODE_LOCK_WEB_CONFIG = 2;
+	FORCED_SETUP_MODE_LOCK_BOTH = 3;
+};
+
+enum DualDirectionalCombinationMode
+{
+
+	MIXED_MODE = 0;
+	GAMEPAD_MODE = 1;
+	DUAL_MODE = 2;
+	NONE_MODE = 3;
+}
+
+enum PS4ControllerType
+{
+
+    PS4_CONTROLLER = 0;
+    PS4_GUITAR = 1;
+    PS4_DRUMS = 2;
+    PS4_WHEEL = 6;
+    PS4_ARCADESTICK = 7;
+    PS4_HOTAS = 8;
+}
+
+enum MacroType
+{
+    MACRO_TYPE_NONE = 0;
+
+    ON_PRESS = 1;
+    ON_HOLD_REPEAT = 2;
+    ON_TOGGLE = 3;
+};
+
+enum GPElement
+{
+
+    GP_ELEMENT_WIDGET = 0;
+    GP_ELEMENT_SCREEN = 1;
+    GP_ELEMENT_BTN_BUTTON = 2;
+    GP_ELEMENT_DIR_BUTTON = 3;
+    GP_ELEMENT_PIN_BUTTON = 4;
+    GP_ELEMENT_LEVER = 5;
+    GP_ELEMENT_LABEL = 6;
+    GP_ELEMENT_SPRITE = 7;
+    GP_ELEMENT_SHAPE = 8;
+    GP_ELEMENT_HE_BUTTON = 9;
+};
+
+enum GPShape
+{
+
+    GP_SHAPE_ELLIPSE = 0;
+    GP_SHAPE_SQUARE = 1;
+    GP_SHAPE_LINE = 2;
+    GP_SHAPE_POLYGON = 3;
+    GP_SHAPE_ARC = 4;
+    GP_SHAPE_PILL = 5;
+};
+
+enum GPLeverMode
+{
+
+    GP_LEVER_MODE_NONE = 0;
+    GP_LEVER_MODE_DIGITAL = 1;
+    GP_LEVER_MODE_LEFT_ANALOG = 2;
+    GP_LEVER_MODE_RIGHT_ANALOG = 4;
+    GP_LEVER_MODE_INVERT_X = 8;
+    GP_LEVER_MODE_INVERT_Y = 16;
+    GP_LEVER_MODE_DPAD = 32;
+};
+
+enum RotaryEncoderPinMode
+{
+
+    ENCODER_MODE_NONE = 0;
+    ENCODER_MODE_LEFT_ANALOG_X = 1;
+    ENCODER_MODE_LEFT_ANALOG_Y = 2;
+    ENCODER_MODE_RIGHT_ANALOG_X = 3;
+    ENCODER_MODE_RIGHT_ANALOG_Y = 4;
+    ENCODER_MODE_LEFT_TRIGGER = 5;
+    ENCODER_MODE_RIGHT_TRIGGER = 6;
+    ENCODER_MODE_DPAD_X = 7;
+    ENCODER_MODE_DPAD_Y = 8;
+    ENCODER_MODE_VOLUME = 9;
+};
+
+enum ReactiveLEDMode
+{
+
+    REACTIVE_LED_STATIC_OFF = 0;
+    REACTIVE_LED_STATIC_ON = 1;
+    REACTIVE_LED_FADE_IN = 2;
+    REACTIVE_LED_FADE_OUT = 3;
+};
+
+enum PS4ControllerIDMode
+{
+
+    PS4_ID_CONSOLE = 0;
+    PS4_ID_EMULATION = 1;
+};
+
+enum DisplaySaverMode
+{
+
+    DISPLAY_SAVER_DISPLAY_OFF = 0;
+    DISPLAY_SAVER_SNOW = 1;
+    DISPLAY_SAVER_BOUNCE = 2;
+    DISPLAY_SAVER_PIPES = 3;
+    DISPLAY_SAVER_TOAST = 4;
+};
+
+enum ButtonLayoutOrientation
+{
+
+    BUTTON_ORIENTATION_DEFAULT = 0;
+    BUTTON_ORIENTATION_SOUTHPAW = 1;
+    BUTTON_ORIENTATION_SWITCHED = 2;
+};
+
+enum GPEventType
+{
+
+    GP_EVENT_BASE = 0;
+    GP_EVENT_RESTART = 1;
+    GP_EVENT_USBHOST_MOUNT = 2;
+    GP_EVENT_USBHOST_UNMOUNT = 3;
+    GP_EVENT_PROFILE_CHANGE = 4;
+    GP_EVENT_ENCODER_CHANGE = 5;
+    GP_EVENT_BUTTON_UP = 6;
+    GP_EVENT_BUTTON_DOWN = 7;
+    GP_EVENT_BUTTON_PROCESSED_UP = 8;
+    GP_EVENT_BUTTON_PROCESSED_DOWN = 9;
+    GP_EVENT_ANALOG_MOVE = 10;
+    GP_EVENT_ANALOG_PROCESSED_MOVE = 11;
+    GP_EVENT_STORAGE_SAVE = 12;
+    GP_EVENT_SYSTEM_REBOOT = 13;
+    GP_EVENT_MENU_NAVIGATE = 14;
+    GP_EVENT_SYSTEM_ERROR = 15;
+};
+
+enum MouseMovementMode
+{
+
+    MOUSE_MOVEMENT_NONE = 0;
+    MOUSE_MOVEMENT_LEFT_ANALOG = 1;
+    MOUSE_MOVEMENT_RIGHT_ANALOG = 2;
+};
