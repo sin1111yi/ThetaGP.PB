@@ -88,12 +88,22 @@ message MemoryRegion {
   uint32 reserved = 4;  // The part of `used` a fixed reserve already holds
 }
 
+// The shape a configuration key's value travels in: one element, or a run of
+// elements, as config.list_keys reports it and the key arms carry it.
+enum ConfigKeyType {
+  CONFIG_KEY_U8       = 0;  // One element, one byte
+  CONFIG_KEY_U16      = 1;  // One element, 16 bits wide, unsigned
+  CONFIG_KEY_I16      = 2;  // One element, 16 bits wide, signed
+  CONFIG_KEY_U8_ARRAY = 3;  // A run of elements, one byte each
+}
+
 // One configuration key the firmware supports, as config.list_keys reports it.
 message ConfigKeyEntry {
-  string key    = 1;  // The key's name, as a request names it
-  int32  min    = 2;  // Lowest value the key accepts
-  int32  max    = 3;  // Highest value the key accepts
-  bool   reboot = 4;
+  string        key    = 1;  // The key's name, as a request names it
+  int32         min    = 2;  // Lowest value the key accepts
+  int32         max    = 3;  // Highest value the key accepts
+  bool          reboot = 4;
+  ConfigKeyType type   = 5;  // The shape the key's value travels in
 }
 
 // A profile body as the configuration store keeps it on its flash chip: the
