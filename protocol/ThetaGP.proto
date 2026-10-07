@@ -104,6 +104,7 @@ message ConfigKeyEntry {
   int32         max    = 3;  // Highest value the key accepts
   bool          reboot = 4;
   ConfigKeyType type   = 5;  // The shape the key's value travels in
+  uint32        count  = 6;  // Elements the value holds, 1 for a scalar key
 }
 
 // A profile body as the configuration store keeps it on its flash chip: the
