@@ -254,6 +254,10 @@ message ConfigListKeysOk {
   // Array of one object per supported key, each object carrying the fields the
   // record type ConfigKeyEntry declares: the key's name, the lowest and
   repeated ConfigKeyEntry keys = 2;
+  // Inputs the board actually wires, counting from 0: the remap table carries
+  // this many real slots, and the elements past it are padding the store keeps
+  // for a board with more.
+  uint32 inputs = 3;
 }
 
 // Write the configuration in effect to the profile it belongs to (the active
