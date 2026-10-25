@@ -3,6 +3,7 @@
 
 ThetaGP.MemoryRegion.name    max_size:32
 ThetaGP.ConfigKeyEntry.key   max_size:25
+ThetaGP.ConfigKeyEntry.value_enum max_size:24
 ThetaGP.SysGetFwVersionOk.board      max_size:32
 ThetaGP.SysGetFwVersionOk.version    max_size:32
 ThetaGP.SysGetFwVersionOk.build_date max_size:32

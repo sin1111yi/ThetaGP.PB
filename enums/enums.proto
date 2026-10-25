@@ -713,3 +713,36 @@ enum MouseMovementMode
     MOUSE_MOVEMENT_LEFT_ANALOG = 1;
     MOUSE_MOVEMENT_RIGHT_ANALOG = 2;
 };
+
+// One button of the gamepad's own table: the index a remap slot feeds, in the
+// order the firmware's mask table carries them. The slot that feeds nothing
+// holds Unmapped, which is the sentinel byte that field carries.
+enum GamepadButton
+{
+
+    GamepadButton_B1 = 0;
+    GamepadButton_B2 = 1;
+    GamepadButton_B3 = 2;
+    GamepadButton_B4 = 3;
+    GamepadButton_L1 = 4;
+    GamepadButton_R1 = 5;
+    GamepadButton_L2 = 6;
+    GamepadButton_R2 = 7;
+    GamepadButton_S1 = 8;
+    GamepadButton_S2 = 9;
+    GamepadButton_L3 = 10;
+    GamepadButton_R3 = 11;
+    GamepadButton_A1 = 12;
+    GamepadButton_A2 = 13;
+    GamepadButton_A3 = 14;
+    GamepadButton_A4 = 15;
+    GamepadButton_E1 = 16;
+    GamepadButton_E2 = 17;
+    GamepadButton_E3 = 18;
+    GamepadButton_E4 = 19;
+    GamepadButton_E5 = 20;
+    GamepadButton_E6 = 21;
+    GamepadButton_E7 = 22;
+    GamepadButton_E8 = 23;
+    GamepadButton_Unmapped = 255;
+};
