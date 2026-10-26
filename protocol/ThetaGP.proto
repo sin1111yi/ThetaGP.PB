@@ -109,6 +109,10 @@ message ConfigKeyEntry {
   // name it stands for: "SOCDMode" for a key whose numbers are that enum's.
   // Empty for a key whose value is a plain number.
   string        value_enum = 7;
+  // Whether the key also takes 255, the sentinel a field carries for "nothing
+  // here": a remap slot a board does not wire holds it. It lies outside the
+  // range above, so a host holds a value to the range and this together.
+  bool          accepts_unmapped = 8;
 }
 
 // A profile body as the configuration store keeps it on its flash chip: the
