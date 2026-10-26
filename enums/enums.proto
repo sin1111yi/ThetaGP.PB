@@ -378,6 +378,16 @@ enum OnBoardLedMode
     ON_BOARD_LED_MODE_PS_AUTH = 3;
 }
 
+// The effect the RGB strip shows: dark, the colour wheel running along the
+// strip, or one colour held at the hue and saturation a profile carries.
+enum LEDMode
+{
+
+    LEDMode_Off = 0;
+    LEDMode_Rainbow = 1;
+    LEDMode_Solid = 2;
+}
+
 enum InputMode
 {
 
