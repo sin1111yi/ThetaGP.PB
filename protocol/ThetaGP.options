@@ -12,6 +12,8 @@ ThetaGP.SysGetFwVersionOk.build_time max_size:32
 ThetaGP.SysGetTaskInfoOk.name        max_size:32
 ThetaGP.SysGetTaskInfoOk.sub         max_size:32
 ThetaGP.SysGetUsageOk.regions        max_count:6
+ThetaGP.SysGetLogLine.text           max_size:96
+ThetaGP.SysGetLogOk.lines            max_count:8
 ThetaGP.Int32Array.elements       max_count:32
 ThetaGP.ConfigSetKey.key          max_size:25
 ThetaGP.ConfigSetKeyOk.key        max_size:25

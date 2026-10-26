@@ -180,6 +180,26 @@ message SysGetTaskInfoOk {
   optional uint32 late_count = 12;  // Times the task missed its deadline, reported only in a build with the test API
 }
 
+// The firmware's own log, as the ring it keeps in RAM holds it. A caller that
+// has read nothing passes 0 and is answered from the oldest line the ring still
+// holds.
+message SysGetLog {
+  uint32 since = 1;  // The last line number the caller already holds
+}
+
+// One line, as the logger wrote it: the number it was given, the level it was
+// written at, and the text the port was sent.
+message SysGetLogLine {
+  uint32 seq   = 1;  // The line's number, counted from boot
+  uint32 level = 2;  // The level it was written at: 0 Info, 1 Warn, 2 Error, 3 Debug
+  string text  = 3;  // The line as the logger formatted it
+}
+
+message SysGetLogOk {
+  uint32 total = 1;  // The number of lines written since boot
+  repeated SysGetLogLine lines = 2;  // The lines after `since`, oldest first
+}
+
 // Aggregate resource usage: CPU load, MCU flash, MCU RAM, external SPI flash.
 message SysGetUsage {}
 
@@ -647,6 +667,8 @@ message Request {
     SysEnterDfu     sys_enter_dfu      = 4;
     SysGetTaskInfo  sys_get_task_info  = 5;
     SysGetUsage     sys_get_usage      = 6;
+    // The system domain's own last arm, past the ranges its neighbours hold.
+    SysGetLog       sys_get_log        = 34;
 
     // -- The configuration domain (7..12) --
     ConfigSetKey       config_set_key       = 7;
@@ -714,6 +736,8 @@ message Reply {
     SysEnterDfuOk     sys_enter_dfu      = 6;
     SysGetTaskInfoOk  sys_get_task_info  = 7;
     SysGetUsageOk     sys_get_usage      = 8;
+    // The system domain's own last arm, past the ranges its neighbours hold.
+    SysGetLogOk       sys_get_log       = 38;
 
     // -- The configuration domain's success arms (9..14) --
     ConfigSetKeyOk       config_set_key       = 9;
