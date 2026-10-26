@@ -378,6 +378,17 @@ enum OnBoardLedMode
     ON_BOARD_LED_MODE_PS_AUTH = 3;
 }
 
+// The threshold a log line is written at: only the levels at or above it reach
+// the port, and Debug shows every line the build kept.
+enum LogLevel
+{
+
+    LogLevel_Info = 0;
+    LogLevel_Warn = 1;
+    LogLevel_Error = 2;
+    LogLevel_Debug = 3;
+}
+
 // The effect the RGB strip shows: dark, the colour wheel running along the
 // strip, or one colour held at the hue and saturation a profile carries.
 enum LEDMode
