@@ -378,15 +378,15 @@ enum OnBoardLedMode
     ON_BOARD_LED_MODE_PS_AUTH = 3;
 }
 
-// The threshold a log line is written at: only the levels at or above it reach
-// the port, and Debug shows every line the build kept.
+// The threshold a profile sets for the log: the three levels a body chooses
+// among. A debug line is not one of them -- a build decides whether it exists
+// (THETAGP_CFG_LOG_DEBUG), and one that keeps them writes every one.
 enum LogLevel
 {
 
     LogLevel_Info = 0;
     LogLevel_Warn = 1;
     LogLevel_Error = 2;
-    LogLevel_Debug = 3;
 }
 
 // The effect the RGB strip shows: dark, the colour wheel running along the
