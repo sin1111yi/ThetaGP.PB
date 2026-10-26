@@ -714,35 +714,43 @@ enum MouseMovementMode
     MOUSE_MOVEMENT_RIGHT_ANALOG = 2;
 };
 
-// One button of the gamepad's own table: the index a remap slot feeds, in the
-// order the firmware's mask table carries them. The slot that feeds nothing
-// holds Unmapped, which is the sentinel byte that field carries.
+// One button of the gamepad's own table, by the bit its mask names: the value a
+// remap slot holds is that bit's index, so UP is 0 and E8 is 31. The slot that
+// feeds nothing holds Unmapped, the sentinel byte that field carries.
 enum GamepadButton
 {
 
-    GamepadButton_B1 = 0;
-    GamepadButton_B2 = 1;
-    GamepadButton_B3 = 2;
-    GamepadButton_B4 = 3;
-    GamepadButton_L1 = 4;
-    GamepadButton_R1 = 5;
-    GamepadButton_L2 = 6;
-    GamepadButton_R2 = 7;
-    GamepadButton_S1 = 8;
-    GamepadButton_S2 = 9;
-    GamepadButton_L3 = 10;
-    GamepadButton_R3 = 11;
-    GamepadButton_A1 = 12;
-    GamepadButton_A2 = 13;
-    GamepadButton_A3 = 14;
-    GamepadButton_A4 = 15;
-    GamepadButton_E1 = 16;
-    GamepadButton_E2 = 17;
-    GamepadButton_E3 = 18;
-    GamepadButton_E4 = 19;
-    GamepadButton_E5 = 20;
-    GamepadButton_E6 = 21;
-    GamepadButton_E7 = 22;
-    GamepadButton_E8 = 23;
-    GamepadButton_Unmapped = 255;
+    GAMEPAD_BUTTON_UP = 0;
+    GAMEPAD_BUTTON_DOWN = 1;
+    GAMEPAD_BUTTON_LEFT = 2;
+    GAMEPAD_BUTTON_RIGHT = 3;
+    GAMEPAD_BUTTON_B1 = 4;
+    GAMEPAD_BUTTON_B2 = 5;
+    GAMEPAD_BUTTON_B3 = 6;
+    GAMEPAD_BUTTON_B4 = 7;
+    GAMEPAD_BUTTON_L1 = 8;
+    GAMEPAD_BUTTON_R1 = 9;
+    GAMEPAD_BUTTON_L2 = 10;
+    GAMEPAD_BUTTON_R2 = 11;
+    GAMEPAD_BUTTON_S1 = 12;
+    GAMEPAD_BUTTON_S2 = 13;
+    GAMEPAD_BUTTON_L3 = 14;
+    GAMEPAD_BUTTON_R3 = 15;
+    GAMEPAD_BUTTON_A1 = 16;
+    GAMEPAD_BUTTON_A2 = 17;
+    GAMEPAD_BUTTON_A3 = 18;
+    GAMEPAD_BUTTON_A4 = 19;
+    GAMEPAD_BUTTON_DU = 20;
+    GAMEPAD_BUTTON_DD = 21;
+    GAMEPAD_BUTTON_DL = 22;
+    GAMEPAD_BUTTON_DR = 23;
+    GAMEPAD_BUTTON_E1 = 24;
+    GAMEPAD_BUTTON_E2 = 25;
+    GAMEPAD_BUTTON_E3 = 26;
+    GAMEPAD_BUTTON_E4 = 27;
+    GAMEPAD_BUTTON_E5 = 28;
+    GAMEPAD_BUTTON_E6 = 29;
+    GAMEPAD_BUTTON_E7 = 30;
+    GAMEPAD_BUTTON_E8 = 31;
+    GAMEPAD_BUTTON_UNMAPPED = 255;
 };
