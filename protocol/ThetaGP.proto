@@ -478,6 +478,25 @@ message TestKeypadScanOk {
   uint64 sum_cycles = 12;
 }
 
+// The input one report tick carries, as the device resolved it.
+message TestInputState {}
+
+message TestInputStateOk {
+  uint32 keys = 1;     // The physical keys the mat reads, one bit per key index
+  uint32 buttons = 2;  // The button bits those keys map to
+  uint32 dpad = 3;     // The direction bits, after the profile's cleaning
+  uint32 lx = 4;       // Left stick, 0..65535
+  uint32 ly = 5;       // Left stick, 0..65535
+  uint32 rx = 6;       // Right stick, 0..65535
+  uint32 ry = 7;       // Right stick, 0..65535
+  uint32 lt = 8;       // Left trigger, 0..255
+  uint32 rt = 9;       // Right trigger, 0..255
+  // The board's analog channels, in wiring order, as the acquisition read them.
+  // A channel the board does not wire carries 0xFFFF, and a board with none
+  // answers no elements at all.
+  repeated uint32 analog = 10;
+}
+
 // ── profile ──
 
 // The profile domain: the nine commands the firmware serves under `profile.`,
@@ -707,6 +726,9 @@ message Request {
     // -- The test domain's flash write (33) --
     // It programs one frame's worth of bytes; a longer run repeats the arm.
     TestFlashWrite test_flash_write = 33;
+
+    // -- The test domain's live input (35) --
+    TestInputState test_input_state = 35;
   }
 }
 
@@ -779,6 +801,9 @@ message Reply {
     TestFlashWriteOk test_flash_write = 35;
     TestFlashChunk   test_flash_chunk = 36;
     TestFlashEnd     test_flash_end   = 37;
+
+    // -- The test domain's live input (39) --
+    TestInputStateOk test_input_state = 39;
   }
 }
 
