@@ -21,4 +21,3 @@ ThetaGP.ConfigGetKey.key          max_size:25
 ThetaGP.ConfigGetKeyOk.key        max_size:25
 ThetaGP.ConfigListKeysOk.keys     max_count:16
 ThetaGP.ProfileListOk.profiles   max_count:16
-ThetaGP.TestInputStateOk.analog  max_count:8
