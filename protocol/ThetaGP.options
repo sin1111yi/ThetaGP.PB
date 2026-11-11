@@ -21,3 +21,5 @@ ThetaGP.ConfigGetKey.key          max_size:25
 ThetaGP.ConfigGetKeyOk.key        max_size:25
 ThetaGP.ConfigListKeysOk.keys     max_count:16
 ThetaGP.ProfileListOk.profiles   max_count:16
+ThetaGP.CoprocStateOk.panel_id   max_size:20
+ThetaGP.CoprocStateOk.release    max_size:20

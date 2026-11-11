@@ -653,6 +653,53 @@ message ProfilePutChunk {
 // assigned.
 message ProfilePutEnd {}
 
+// ── The coprocessor domain (35..36) ──
+
+// The page the panel draws, numbered as the panel's own beat numbers it.
+enum CoprocPage {
+  COPROC_PAGE_MENU     = 0;
+  COPROC_PAGE_MONITOR  = 1;
+  COPROC_PAGE_OPTIONS  = 2;
+  COPROC_PAGE_MAPPING  = 3;
+  COPROC_PAGE_PROFILES = 4;
+  COPROC_PAGE_ABOUT    = 5;
+}
+
+// What a navigation step asks the panel to do.
+enum CoprocAction {
+  COPROC_PREV  = 0;  // The mark one place back
+  COPROC_NEXT  = 1;  // The mark one place on
+  COPROC_ENTER = 2;  // Open the place the mark sits on
+  COPROC_BACK  = 3;  // Leave the page for the one before it
+  COPROC_SHOW  = 4;  // Open the page `page` names, from anywhere
+}
+
+// The panel's own last word: what it is and what is on its screen.
+message CoprocGetState {}
+
+message CoprocStateOk {
+  bool attached = 1;    // The panel is answering this board
+  string panel_id = 2;  // The name the panel's build identifies by
+  string release = 3;   // The release it runs
+  uint32 page = 4;      // From CoprocPage
+  uint32 item = 5;      // The place the mark sits on that page
+  uint32 uptime_s = 6;  // Seconds since the panel booted
+  uint32 dropped = 7;   // Frames the panel refused, whole, since boot
+}
+
+// One navigation step for the panel. The panel applies it and reports what it
+// shows in its next beat, which is the whole acknowledgement there is: a host
+// that wants to see the move asks for the state again.
+message CoprocNav {
+  CoprocAction action = 1;
+  optional uint32 page = 2;  // Read for COPROC_SHOW, and no other action
+}
+
+message CoprocNavOk {
+  uint32 page = 1;  // The page the panel is showing
+  uint32 item = 2;  // The place the mark sits on it
+}
+
 // ── request ──
 
 // The request envelope: the command a host asks for, and nothing else. The
@@ -674,6 +721,10 @@ message Request {
     SysGetUsage     sys_get_usage      = 6;
     // The system domain's own last arm, past the ranges its neighbours hold.
     SysGetLog       sys_get_log        = 34;
+
+    // -- The coprocessor domain (35..36) --
+    CoprocGetState coproc_get_state = 35;
+    CoprocNav      coproc_nav       = 36;
 
     // -- The configuration domain (7..12) --
     ConfigSetKey       config_set_key       = 7;
@@ -777,6 +828,10 @@ message Reply {
     // profile.get's read answers with these after its opening arm (24): the
     ProfileChunk profile_chunk = 32;
     ProfileEnd   profile_end   = 33;
+
+    // -- The coprocessor domain's success arms (39..40) --
+    CoprocStateOk coproc_state = 39;
+    CoprocNavOk   coproc_nav   = 40;
 
     // -- The test domain's flash write and read continuations (35..37) --
     // A flash write answers with its own arm (35), and a flash read answers
