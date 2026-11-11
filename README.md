@@ -49,6 +49,24 @@ payload is at most 1,024 B, so a frame is at most 1,028 B. A host numbers its
 frames through `queued`: the reply carries request+1 and the host's next frame
 carries reply+1.
 
+## The two boards
+
+`Link.proto` is the schema the panel board and the main board speak to each
+other: the two greetings, the main board's state, the panel's beat, and one
+navigation step. It is not the host's, and the host never sees it — the main
+board translates, and only the `coproc` domain of `ThetaGP.proto` carries any of
+it outward.
+
+| Host arm | What it asks | Board message |
+|---|---|---|
+| `coproc.get_state` | What the panel is and what is on its screen | the last `Beat` this board kept |
+| `coproc.nav` | One navigation step | `Nav`, which the panel answers in its next `Beat` |
+
+The page numbers a host reads and writes (`CoprocPage`) are the panel's own, so
+a `coproc_state` after a `coproc_nav` says exactly what the screen says. A step
+is not acknowledged on the wire: the panel applies it, and the next beat is the
+whole answer.
+
 ## Rules
 
 - Arm numbers run dense from 1 within each `oneof`, assigned once, never reused;
