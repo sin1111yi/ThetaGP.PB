@@ -53,7 +53,7 @@ message Beat {
   uint32 dropped = 7;    // Frames the panel refused, whole, since boot
 }
 
-// The page a Beat's `page` names, and the page a Nav may ask for.
+// The page a Beat's `page` names.
 enum Page {
   PAGE_MENU = 0;
   PAGE_MONITOR = 1;
@@ -63,22 +63,24 @@ enum Page {
   PAGE_ABOUT = 5;
 }
 
-// What a Nav asks the panel to do.
+// The panel's own keys: the six the screen is navigated with. A sender says
+// what the key means, never which pin it sits on -- the four directions, the
+// one that takes the choice, and the one that leaves.
 enum NavAction {
-  NAV_NONE = 0;
-  NAV_PREV = 1;   // The mark one place back
-  NAV_NEXT = 2;   // The mark one place on
-  NAV_ENTER = 3;  // Open the place the mark sits on
-  NAV_BACK = 4;   // Leave the page and return to the one before it
-  NAV_SHOW = 5;   // Open the page `page` names, from anywhere
+  NAV_UP = 0;
+  NAV_DOWN = 1;
+  NAV_LEFT = 2;
+  NAV_RIGHT = 3;
+  NAV_CONFIRM = 4;
+  NAV_BACK = 5;
 }
 
-// One navigation step, sent when a host or a button asks for it. The panel
-// applies it and says what it now shows in its next Beat, which is the whole
-// acknowledgement the link carries.
+// One key, sent when a host or a button presses it. The panel applies it and
+// says what it now shows in its next Beat, which is the whole acknowledgement
+// the link carries.
 message Nav {
   NavAction action = 1;
-  uint32 page = 2;     // Read for NAV_SHOW, and no other action
+  reserved 2;  // The page a Nav could ask for directly; the keys say enough
 }
 
 // The envelope every frame carries: the message it holds, and nothing else.

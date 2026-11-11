@@ -665,13 +665,15 @@ enum CoprocPage {
   COPROC_PAGE_ABOUT    = 5;
 }
 
-// What a navigation step asks the panel to do.
+// The panel's own keys: the six the screen is navigated with. A caller says
+// what the key means, never which pin it sits on.
 enum CoprocAction {
-  COPROC_PREV  = 0;  // The mark one place back
-  COPROC_NEXT  = 1;  // The mark one place on
-  COPROC_ENTER = 2;  // Open the place the mark sits on
-  COPROC_BACK  = 3;  // Leave the page for the one before it
-  COPROC_SHOW  = 4;  // Open the page `page` names, from anywhere
+  COPROC_UP      = 0;
+  COPROC_DOWN    = 1;
+  COPROC_LEFT    = 2;
+  COPROC_RIGHT   = 3;
+  COPROC_CONFIRM = 4;
+  COPROC_BACK    = 5;
 }
 
 // The panel's own last word: what it is and what is on its screen.
@@ -687,12 +689,12 @@ message CoprocStateOk {
   uint32 dropped = 7;   // Frames the panel refused, whole, since boot
 }
 
-// One navigation step for the panel. The panel applies it and reports what it
-// shows in its next beat, which is the whole acknowledgement there is: a host
-// that wants to see the move asks for the state again.
+// One key for the panel. The panel applies it and reports what it shows in its
+// next beat, which is the whole acknowledgement there is: a host that wants to
+// see the move asks for the state again.
 message CoprocNav {
   CoprocAction action = 1;
-  optional uint32 page = 2;  // Read for COPROC_SHOW, and no other action
+  reserved 2;  // The page it could ask for directly; the keys say enough
 }
 
 message CoprocNavOk {
