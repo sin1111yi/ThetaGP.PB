@@ -11,8 +11,10 @@ its field bounds, this README and a generator; it knows no consumer.
 ## Layout
 
 ```
-ThetaGP.proto     the schema
+ThetaGP.proto     the schema the host and the device speak
 ThetaGP.options   nanopb field bounds
+Link.proto        the schema the two boards speak to each other
+Link.options      its nanopb field bounds
 generate.py       the generator
 README.md
 LICENSE           GPL-3.0
@@ -22,8 +24,13 @@ LICENSE           GPL-3.0
 
 ```
 generate.py c --nanopb <checkout> --out <dir>   # the C codec
+generate.py c --schema protocol/Link.proto ...   # the boards' own codec
 generate.py python --out <dir>                   # the Python bindings
 ```
+
+`c` writes the codec of one schema; a consumer that compiles more than one
+runs it once per schema, and `--schema` names the one (`protocol/ThetaGP.proto`
+when it is left out).
 
 `c` runs `protoc` and the nanopb generator at
 `<checkout>/generator/nanopb_generator.py`; the checkout is the consumer's,

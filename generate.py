@@ -25,6 +25,7 @@ import tempfile
 
 REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
 WIRE_SCHEMA = "protocol/ThetaGP.proto"
+LINK_SCHEMA = "protocol/Link.proto"
 ENUMS_SCHEMA = "enums/enums.proto"
 
 PROTOBUF_PYTHONPATH_ENV = "PROTOBUF_PYTHONPATH"
@@ -71,7 +72,9 @@ def run_generation(argv):
 
 
 def generate_c(args) -> int:
-    schema = os.path.join(REPO_ROOT, WIRE_SCHEMA)
+    # One schema at a time: `c` writes the pair of the schema it is given, and
+    # a consumer that compiles more than one runs it once per schema.
+    schema = os.path.join(REPO_ROOT, args.schema)
     out_dir = os.path.abspath(args.out)
     generator = os.path.join(args.nanopb, "generator", "nanopb_generator.py")
 
@@ -97,7 +100,7 @@ def generate_c(args) -> int:
                              if env.get("PYTHONPATH") else runtime)
 
     os.makedirs(out_dir, exist_ok=True)
-    stem = os.path.splitext(os.path.basename(WIRE_SCHEMA))[0]
+    stem = os.path.splitext(os.path.basename(schema))[0]
     outputs = [os.path.join(out_dir, stem + ".pb.c"),
                os.path.join(out_dir, stem + ".pb.h")]
 
@@ -212,11 +215,15 @@ def generate_cpp_enums(args) -> int:
 
 def main(argv) -> int:
     parser = argparse.ArgumentParser(
-        description="Generate the artifacts of " + WIRE_SCHEMA + ": the C codec "
-                    "(nanopb) and the Python bindings.")
+        description="Generate the artifacts of the schemas in protocol/: the C "
+                    "codec (nanopb) and the Python bindings.")
     subparsers = parser.add_subparsers(dest="what", required=True)
 
     c = subparsers.add_parser("c", help="the C codec the firmware compiles")
+    c.add_argument("--schema", default=WIRE_SCHEMA, metavar="PATH",
+                   help="the schema whose codec is written (default: "
+                        + WIRE_SCHEMA + "; " + LINK_SCHEMA + " is the boards' "
+                        "own link)")
     c.add_argument("--nanopb", required=True, metavar="DIR",
                    help="the nanopb checkout; its generator/ holds "
                         "nanopb_generator.py")

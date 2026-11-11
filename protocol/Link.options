@@ -1,0 +1,8 @@
+// Field bounds: every string the link carries has one, so a decoded message is
+// a fixed-size struct on both boards.
+
+ThetaGP.Link.Hello.panel_id       max_size:20
+ThetaGP.Link.Hello.release        max_size:20
+ThetaGP.Link.Board.board_id       max_size:20
+ThetaGP.Link.Board.release        max_size:20
+ThetaGP.Link.State.profile_name   max_size:24

@@ -1,0 +1,93 @@
+// The link between the two boards: one message per frame, in the frame the wire
+// defines. The panel and the main board both compile this schema, so the two
+// sides cannot disagree about a field name, a type or an order.
+//
+// Nothing here is the host's: the main board translates between this schema and
+// ThetaGP.proto, and the host never sees these messages.
+
+syntax = "proto3";
+
+package ThetaGP.Link;
+
+// What the panel is, said at boot and then while the main board has not
+// answered. `protocol` names the schema version the panel speaks: a side that
+// reads a higher number still reads the fields it knows, because this schema
+// only ever grows.
+message Hello {
+  uint32 protocol = 1;    // The schema version the panel speaks
+  string panel_id = 2;    // The name this build identifies by
+  string release = 3;     // The release it runs
+  uint32 width = 4;       // The surface it draws, in pixels, as it is mounted
+  uint32 height = 5;      // 428x156 for the panel on its side
+}
+
+// What the main board is: the answer to a Hello, so the panel can name the
+// board whose screen it is.
+message Board {
+  uint32 protocol = 1;    // The schema version the main board speaks
+  string board_id = 2;    // The board's identifier, as its build names it
+  string release = 3;     // The firmware release, without the commit suffix
+}
+
+// What the main board wants shown: the whole of it, sent every half second and
+// at once when one of these changes. The panel reads the message and never
+// asks, so a lost one costs at most half a second.
+message State {
+  uint32 report_hz = 1;      // The report rate the main board sends at
+  uint32 profile_id = 2;     // The active profile, from 1
+  uint32 profile_count = 3;  // How many the store holds
+  string profile_name = 4;   // The active profile's name
+  bool host_attached = 5;    // A host is on the other side of the USB link
+  bool storing = 6;          // The board carries a profile store
+}
+
+// What the panel is showing, on the same cadence as State: the main board keeps
+// the last one, and any host that asks what the screen says is answered from it.
+message Beat {
+  uint32 uptime_s = 1;   // Seconds since the panel booted
+  uint32 page = 2;       // The page on screen, from Page
+  uint32 item = 3;       // The place the mark sits on that page
+  bool link = 4;         // The panel is hearing the main board
+  bool backlight = 5;    // The panel's backlight is on
+  bool intro_done = 6;   // The power-up wordmark has played out
+  uint32 dropped = 7;    // Frames the panel refused, whole, since boot
+}
+
+// The page a Beat's `page` names, and the page a Nav may ask for.
+enum Page {
+  PAGE_MENU = 0;
+  PAGE_MONITOR = 1;
+  PAGE_OPTIONS = 2;
+  PAGE_MAPPING = 3;
+  PAGE_PROFILES = 4;
+  PAGE_ABOUT = 5;
+}
+
+// What a Nav asks the panel to do.
+enum NavAction {
+  NAV_NONE = 0;
+  NAV_PREV = 1;   // The mark one place back
+  NAV_NEXT = 2;   // The mark one place on
+  NAV_ENTER = 3;  // Open the place the mark sits on
+  NAV_BACK = 4;   // Leave the page and return to the one before it
+  NAV_SHOW = 5;   // Open the page `page` names, from anywhere
+}
+
+// One navigation step, sent when a host or a button asks for it. The panel
+// applies it and says what it now shows in its next Beat, which is the whole
+// acknowledgement the link carries.
+message Nav {
+  NavAction action = 1;
+  uint32 page = 2;     // Read for NAV_SHOW, and no other action
+}
+
+// The envelope every frame carries: the message it holds, and nothing else.
+message Message {
+  oneof kind {
+    Hello hello = 1;
+    Board board = 2;
+    State state = 3;
+    Beat beat = 4;
+    Nav nav = 5;
+  }
+}
