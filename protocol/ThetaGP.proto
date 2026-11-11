@@ -178,6 +178,11 @@ message SysGetTaskInfoOk {
   // reply of a build that does not leaves them out. `optional` is what makes
   optional uint32 run_count  = 11;  // Times the task function has run, reported only in a build with the test API
   optional uint32 late_count = 12;  // Times the task missed its deadline, reported only in a build with the test API
+  // The scheduler's own accounting: what the run did to the release schedule
+  // and to the clearance it started under.
+  optional uint32 clearance_overruns = 13;  // Runs longer than the clearance they started under
+  optional uint32 deferrals           = 14;  // Runs held back by a nearer higher-priority release
+  optional uint32 missed_releases     = 15;  // Releases that came due while the task was not run
 }
 
 // The firmware's own log, as the ring it keeps in RAM holds it. A caller that
