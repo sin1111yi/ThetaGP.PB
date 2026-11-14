@@ -62,6 +62,9 @@ enum Reason {
   REASON_FRAME_INCOMPLETE          = 30; // A declared length whose bytes stopped arriving
   REASON_PAYLOAD_UNREADABLE        = 31; // The sum held, and the payload is not a message
   REASON_FRAME_NO_ROOM             = 32; // The receive side had no slot left for it
+  // The coprocessor the command was for has not been heard from: the panel is
+  // rebooting, unplugged, or not there at all.
+  REASON_COPROCESSOR_SILENT        = 33;
 }
 
 // A command failure: the request was read, and what it asked for was refused
