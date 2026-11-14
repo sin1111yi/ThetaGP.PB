@@ -55,13 +55,12 @@ message Beat {
 
 // The page a Beat's `page` names.
 enum Page {
-  PAGE_HOME = 0;      // The menu itself: monitor, profiles, about
-  PAGE_MONITOR = 1;   // What the device is doing now
-  PAGE_PROFILES = 2;  // Every profile the store carries
-  PAGE_PROFILE = 3;   // One profile: its mapping, its options
-  PAGE_MAPPING = 4;   // The keys of the profile being shown
-  PAGE_OPTIONS = 5;   // Its settings
-  PAGE_ABOUT = 6;     // What the build is
+  PAGE_MENU = 0;
+  PAGE_MONITOR = 1;
+  PAGE_OPTIONS = 2;
+  PAGE_MAPPING = 3;
+  PAGE_PROFILES = 4;
+  PAGE_ABOUT = 5;
 }
 
 // The panel's own keys: the six the screen is navigated with. A sender says
