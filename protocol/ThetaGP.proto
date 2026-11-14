@@ -657,12 +657,13 @@ message ProfilePutEnd {}
 
 // The page the panel draws, numbered as the panel's own beat numbers it.
 enum CoprocPage {
-  COPROC_PAGE_MENU     = 0;
+  COPROC_PAGE_HOME     = 0;
   COPROC_PAGE_MONITOR  = 1;
-  COPROC_PAGE_OPTIONS  = 2;
-  COPROC_PAGE_MAPPING  = 3;
-  COPROC_PAGE_PROFILES = 4;
-  COPROC_PAGE_ABOUT    = 5;
+  COPROC_PAGE_PROFILES = 2;
+  COPROC_PAGE_PROFILE  = 3;
+  COPROC_PAGE_MAPPING  = 4;
+  COPROC_PAGE_OPTIONS  = 5;
+  COPROC_PAGE_ABOUT    = 6;
 }
 
 // The panel's own keys: the six the screen is navigated with. A caller says
